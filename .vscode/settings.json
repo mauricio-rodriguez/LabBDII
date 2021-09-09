@@ -3,6 +3,7 @@
         ".html": "html",
         "*.html": "html",
         "iosfwd": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "iostream": "cpp"
     }
 }

@@ -9,6 +9,31 @@ struct Alumno
     char nombre[11];
     char apellidos[20];
     char carrera[15];
+
+    void print(){
+        cout<<"Codigo: "<<this->codigo<<" "; 
+        cout<<"nombre: "<<this->nombre<<" ";
+        cout<<"apellidos: "<<this->apellidos<<" ";
+        cout<<"carrera: "<<this->carrera<<" ";
+        cout<<endl;
+    }
+
+    void formatTXT(char buffer[], int size){
+        int n = string(buffer).length();
+        for (int i =0;i<size;i++){
+            if (i<n){ }
+            else{
+                buffer[i] = ' ';
+            }
+        }
+    }
+
+    void format(){
+        formatTXT(this->codigo,5);
+        formatTXT(this->nombre,11);
+        formatTXT(this->apellidos,20);
+        formatTXT(this->carrera,15);
+    }
 };
 
 class FixedRecord{
@@ -30,23 +55,25 @@ class FixedRecord{
         inFile.open(this->fileName);
         if (inFile.is_open()){
             while(inFile){
-            inFile.read(record.codigo,5);
-            inFile.read(record.nombre,11);
-            inFile.read(record.apellidos,20);
-            inFile.read(record.carrera,15);
-            aula.push_back(record);
-            inFile.get();
-        }
+                inFile.get(record.codigo,5);
+                inFile.get(record.nombre,11);
+                inFile.get(record.apellidos,20);
+                inFile.get(record.carrera,15);
+                aula.push_back(record);
+                inFile.get();
+            }
             inFile.close();
         }
         return aula;
     }
 
-    void add(const Alumno &record){
+    void add(Alumno record){
        //para agregar un nuevo registro al archivo
-        ofstream outFile;
+        fstream outFile;
         outFile.open(this->fileName);
         if (outFile.is_open()){
+            record.format();
+            outFile.seekg(0, ios::end);
             outFile.write(record.codigo,5);
             outFile.write(record.nombre,11);
             outFile.write(record.apellidos,20);
@@ -65,14 +92,15 @@ class FixedRecord{
         Alumno record;
         inFile.open(this->fileName);
         if (inFile.is_open()){
-            inFile.seekg(pos*sizeof(record));
-            // inFile.read(record.codigo,5);
-            // inFile.read(record.nombre,11);
-            // inFile.read(record.apellidos,20);
-            // inFile.read(record.carrera,15);
-            // inFile.get();
-            inFile.read((char *) &record,sizeof(record));
-            inFile.close();
+            inFile.seekg(pos* sizeof(record);
+            cout<<inFile.tellg();
+            inFile.clear();
+            inFile.get(record.codigo,5);
+            inFile.get(record.nombre,11);
+            inFile.get(record.apellidos,20);
+            inFile.get(record.carrera,15);
+            inFile.get();
+            inFile.close(); 
         }
         else{
             cout<<"No se pudo abrir el archivo";
@@ -86,13 +114,15 @@ class FixedRecord{
 int main(int argc, char const *argv[])
 {
     FixedRecord manager("datos1.txt");
-    Alumno nuevoAlumno{};
-    auto alumno = manager.readRecord(1);
-    cout<<alumno.nombre;
+    // vector<Alumno> vec = manager.load();
+    // Alumno nuevoAlumno{"0002","Mauricio","Rodriguez","Computacion"};
+    // manager.add(nuevoAlumno);
 
-    // auto vec = manager.load();
+    auto alumno = manager.readRecord(0);
+    alumno.print();
+
     // for (auto i = 0;i<vec.size();i++){
-    //     cout<<vec[i].nombre;
+    //   vec[i].print();
     // }
-    // return 0;
+    return 0;
 }
