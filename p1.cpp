@@ -92,9 +92,8 @@ class FixedRecord{
         Alumno record;
         inFile.open(this->fileName);
         if (inFile.is_open()){
-            inFile.seekg(pos* sizeof(record);
-            cout<<inFile.tellg();
             inFile.clear();
+            inFile.seekg(pos* sizeof(record)+1);
             inFile.get(record.codigo,5);
             inFile.get(record.nombre,11);
             inFile.get(record.apellidos,20);
@@ -118,7 +117,7 @@ int main(int argc, char const *argv[])
     // Alumno nuevoAlumno{"0002","Mauricio","Rodriguez","Computacion"};
     // manager.add(nuevoAlumno);
 
-    auto alumno = manager.readRecord(0);
+    auto alumno = manager.readRecord(2);
     alumno.print();
 
     // for (auto i = 0;i<vec.size();i++){
