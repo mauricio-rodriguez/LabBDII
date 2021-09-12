@@ -1,8 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string.h>
 using namespace std;
-
+int codeSize = 5;
+int nameSize = 11;
+int lnameSize = 20;
+int carrSize = 15;
 struct Alumno
 {
     char codigo[5];
@@ -11,11 +15,62 @@ struct Alumno
     char carrera[15];
 
     void print(){
-        cout<<"Codigo: "<<this->codigo<<" "; 
-        cout<<"nombre: "<<this->nombre<<" ";
-        cout<<"apellidos: "<<this->apellidos<<" ";
-        cout<<"carrera: "<<this->carrera<<" ";
-        cout<<endl;
+        cout<<"Codigo: "; 
+        for(int i = 0; i < 5; ++i){
+            cout << codigo[i];
+        }
+        cout << endl;
+        cout << "Nombre: ";
+        for(int i = 0; i < 11; ++i){
+            cout << nombre[i];
+        }
+        cout << endl;
+        cout << "Apellido: ";
+        for(int i = 0; i < 20; ++i){
+            cout << apellidos[i];
+        }     
+        cout << endl;
+        cout << "Carrera: ";
+        for(int i = 0; i < 15; ++i){
+            cout << carrera[i];
+        }
+        cout << endl;
+        cout<<"------------------------"<<endl;
+    }
+    Alumno(){}
+    
+    Alumno(string codigo,string nombre,string apellidos, string carrera){
+        for (int i = 0; i < 5; ++i){
+            if(i >= codigo.size()) {
+                this->codigo[i] = ' ';
+            } else {
+                this->codigo[i] = codigo[i];
+            }
+        }
+
+        for(int i = 0; i < 11; ++i){
+            if(i >= nombre.size()) {
+                this->nombre[i] = ' ';
+            } else {
+                this->nombre[i] = nombre[i];
+            }
+        }
+
+        for(int i = 0; i < 20; ++i) {
+            if(i >= apellidos.size()) {
+                this->apellidos[i] = ' ';
+            } else {
+                this->apellidos[i] = apellidos[i];
+            }
+        }
+
+        for(int i = 0; i < 15; ++i) {
+            if(i >= carrera.size()) {
+                this->carrera[i] = ' ';
+            } else {
+                this->carrera[i] = carrera[i];
+            }
+        }
     }
 
     void formatTXT(char buffer[], int size){
@@ -52,15 +107,15 @@ class FixedRecord{
         ifstream inFile;
         vector<Alumno> aula;
         Alumno record;
+        char buffer[sizeof(record)];
         inFile.open(this->fileName);
         if (inFile.is_open()){
-            while(inFile){
-                inFile.get(record.codigo,5);
-                inFile.get(record.nombre,11);
-                inFile.get(record.apellidos,20);
-                inFile.get(record.carrera,15);
-                aula.push_back(record);
+            while(!inFile.eof()){
+                inFile.read((char*) &buffer,sizeof(record));
                 inFile.get();
+                inFile.get();
+                record = desempaquetar(buffer);
+                aula.push_back(record);
             }
             inFile.close();
         }
@@ -86,6 +141,29 @@ class FixedRecord{
             cout<<"No se pudo abrir el archivo";
         }
     }
+
+    Alumno desempaquetar(char * buffer){
+        string codigo="";
+        string nombre = "";
+        string apellidos = "";
+        string carrera = "";
+        
+        for (auto i=0;i<codeSize;i++){
+            codigo+= buffer[i];
+        }
+
+        for (auto i=codeSize;i<codeSize+nameSize;i++){
+            nombre+= buffer[i];
+        }
+        for (auto i=codeSize+nameSize;i<codeSize+nameSize+lnameSize;i++){
+            apellidos+= buffer[i];
+        }
+        for (auto i=codeSize+nameSize+lnameSize;i<codeSize+nameSize+lnameSize+carrSize;i++){
+            carrera+= buffer[i];
+        } 
+        Alumno record{codigo,nombre,apellidos,carrera};
+        return record;
+    }
     Alumno readRecord(int pos){
         //para obtener el registro de la posición “pos”.
         ifstream inFile;
@@ -93,12 +171,10 @@ class FixedRecord{
         inFile.open(this->fileName);
         if (inFile.is_open()){
             inFile.clear();
-            inFile.seekg(pos* sizeof(record)+1);
-            inFile.get(record.codigo,5);
-            inFile.get(record.nombre,11);
-            inFile.get(record.apellidos,20);
-            inFile.get(record.carrera,15);
-            inFile.get();
+            inFile.seekg(pos* sizeof(record)+4);
+            char buffer[sizeof(record)];
+            inFile.read((char*) &buffer,sizeof(record));
+            record = desempaquetar(buffer);
             inFile.close(); 
         }
         else{
@@ -113,15 +189,18 @@ class FixedRecord{
 int main(int argc, char const *argv[])
 {
     FixedRecord manager("datos1.txt");
-    // vector<Alumno> vec = manager.load();
-    // Alumno nuevoAlumno{"0002","Mauricio","Rodriguez","Computacion"};
-    // manager.add(nuevoAlumno);
-
+    //testing readRecord
     auto alumno = manager.readRecord(2);
     alumno.print();
 
-    // for (auto i = 0;i<vec.size();i++){
-    //   vec[i].print();
-    // }
+    //testing add()
+    Alumno nuevoAlumno{"0008","Mauricio","Rodriguez","Computacion"};
+    manager.add(nuevoAlumno);
+
+    //testing load
+    vector<Alumno> vec = manager.load();
+    for (auto i = 0;i<vec.size();i++){
+      vec[i].print();
+    }
     return 0;
 }
