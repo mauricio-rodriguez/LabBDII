@@ -1,0 +1,8 @@
+1   
+0001 Howard      Paredes Zegarra     Computacion    10  1516.89 -1  
+0002 Penny       Vargas Cordero      Industrial     8   1790.90 0   
+0003 Sheldon     Cooper Quizpe       Mecatronica    7   1600.10 0   
+0004 Penny       Vargas Cordero      Industrial     5   1392.00 0   
+0005 Sheldon     Cooper Quizpe       Mecatronica    4   1340.70 0   
+0006 Penny       Vargas Cordero      Industrial     7   1690.00 0   
+0007 Sheldon     Cooper Quizpe       Mecatronica    9   1200.50 0   
