@@ -14,7 +14,7 @@ struct Alumno{
     char carrera[15];
     int ciclo;
     float mensualidad;
-    int next;
+    int next = 0;
 
     void print(){
         cout<<"Codigo: "; 
@@ -104,17 +104,14 @@ class FixedRecord{
     FixedRecord(string fileName){
         this->fileName = fileName;
         fstream mainFile;
-        mainFile.open(fileName,ios::binary);
+        mainFile.open(fileName);
         if (mainFile.is_open()){
-            mainFile.seekg(0, std::ios::beg);
-            int next = -1;
-            mainFile.write((char*) &next,sizeof(int));
-            Alumno record;
-            int i =0;
-            while(!mainFile.eof()){
-                mainFile.seekg(i*sizeof(record)-sizeof(int));
-                mainFile<< "0   \n";
-                i++;
+            char buffer[sizeof(int)];
+            mainFile.read((char*) &buffer,sizeof(int));
+            if (string(buffer)!= "-1  "){
+                char code[5];
+                mainFile.seekg(0, std::ios::beg);
+                mainFile<<"-1  \n";
             }
             mainFile.close();
         }
@@ -127,14 +124,27 @@ class FixedRecord{
     }
 
     bool deleteRecord(int pos){
-        fstream file("datos1.dat", ios::out|ios::binary);
-        Alumno record;
+        fstream file;
+        file.open(this->fileName);
         if (file.is_open()){
             char last[sizeof(int)];
-            file.seekg(0);
+            char cpos[sizeof(int)] = {' '};
+            file.seekg(0,ios::beg);
             file.read((char*) &last,sizeof(int));
-            file.seekg(pos*sizeof(record)-sizeof(int));
-            file << last;
+            file.seekg(pos*sizeof(Alumno)+5);
+            file.write(last,4);
+            file<<"\n";
+            //
+            file.seekg(0,ios::beg);
+            for (int i =0;i<sizeof(int);i++){
+                if (i<to_string(pos).length()){
+                    cpos[i]=to_string(pos)[i];
+                }
+                else{
+                    cpos[i] = ' ';
+                }
+            }
+            file<<cpos;
         }
         else{
             cout<<"No se pudo abrir el archivo";
@@ -161,80 +171,116 @@ class FixedRecord{
     //     return aula;
     // }
 
-    // void add(Alumno record){
-    //    //para agregar un nuevo registro al archivo
-    //     fstream outFile;
-    //     outFile.open(this->fileName,ios::binary);
-    //     if (outFile.is_open()){
-    //         record.format();
-    //         outFile.seekg(0, ios::end);
-    //         outFile.write(record.codigo,5);
-    //         outFile.write(record.nombre,11);
-    //         outFile.write(record.apellidos,20);
-    //         outFile.write(record.carrera,15);
-    //         outFile<< "\n";
-    //         outFile<< flush;
-    //         outFile.close();
-    //     }
-    //     else{
-    //         cout<<"No se pudo abrir el archivo";
-    //     }
-    // }
 
-    // Alumno desempaquetar(char * buffer){
-    //     string codigo="";
-    //     string nombre = "";
-    //     string apellidos = "";
-    //     string carrera = "";
+
+
+    void add(Alumno record){
+       //para agregar un nuevo registro al archivo
+        fstream outFile;
+        char buffer[sizeof(int)];
+        outFile.open(this->fileName);
+        if (outFile.is_open()){
+            record.format();
+            outFile.seekg(0, ios::beg);
+            char buffer[sizeof(int)];
+            outFile.read((char*) &buffer,sizeof(int));
+            if (stoi(string(buffer))== -1){
+                outFile.seekg(0,ios::end);
+                outFile.write((char*)&record,(sizeof(record)));
+                outFile<<"0   \n";
+                outFile<< "\n";
+                outFile<< flush;
+            }
+            else{
+                outFile.seekg(5+stoi(string(buffer))*sizeof(Alumno), ios::beg);
+                char last[sizeof(int)];
+                outFile.read((char*) &last,4);
+                outFile.seekg(0,ios::beg);
+                outFile<<last;
+                outFile.seekg(5+(stoi(string(buffer))-1)*sizeof(Alumno), ios::beg);
+                outFile.write((char*)&record,(sizeof(record)));
+            }
+            outFile.close();
+        }
+        else{
+            cout<<"No se pudo abrir el archivo";
+        }
+    }
+
+    Alumno desempaquetar(char * buffer){
+        string codigo="";
+        string nombre = "";
+        string apellidos = "";
+        string carrera = "";
+        string ciclo = "";
+        string mensualidad= "";
         
-    //     for (auto i=0;i<codeSize;i++){
-    //         codigo+= buffer[i];
-    //     }
+        for (auto i=0;i<codeSize;i++){
+            codigo+= buffer[i];
+        }
 
-    //     for (auto i=codeSize;i<codeSize+nameSize;i++){
-    //         nombre+= buffer[i];
-    //     }
-    //     for (auto i=codeSize+nameSize;i<codeSize+nameSize+lnameSize;i++){
-    //         apellidos+= buffer[i];
-    //     }
-    //     for (auto i=codeSize+nameSize+lnameSize;i<codeSize+nameSize+lnameSize+carrSize;i++){
-    //         carrera+= buffer[i];
-    //     } 
-    //     Alumno record{codigo,nombre,apellidos,carrera};
-    //     return record;
-    // }
-    // Alumno readRecord(int pos){
-    //     //para obtener el registro de la posición “pos”.
-    //     ifstream inFile;
-    //     Alumno record;
-    //     inFile.open(this->fileName,ios::binary);
-    //     if (inFile.is_open()){
-    //         inFile.clear();
-    //         inFile.seekg(pos* sizeof(record)+4);
-    //         char buffer[sizeof(record)];
-    //         inFile.read((char*) &buffer,sizeof(record));
-    //         record = desempaquetar(buffer);
-    //         inFile.close(); 
-    //     }
-    //     else{
-    //         cout<<"No se pudo abrir el archivo";
-    //     }
-    //     return record;
-    // }
+        for (auto i=codeSize;i<codeSize+nameSize;i++){
+            nombre+= buffer[i];
+        }
+        for (auto i=codeSize+nameSize;i<codeSize+nameSize+lnameSize;i++){
+            apellidos+= buffer[i];
+        }
+        for (auto i=codeSize+nameSize+lnameSize;i<codeSize+nameSize+lnameSize+carrSize;i++){
+            carrera+= buffer[i];
+        } 
+        for (auto i=codeSize+nameSize+lnameSize+carrSize;i<codeSize+nameSize+lnameSize+carrSize+sizeof(int);i++){
+            ciclo+= buffer[i];
+        } 
+        for (auto i=codeSize+nameSize+lnameSize+carrSize+sizeof(int);i<codeSize+nameSize+lnameSize+carrSize+sizeof(int)+sizeof(float);i++){
+            ciclo+= buffer[i];
+        }
+        Alumno record{codigo,nombre,apellidos,carrera,stoi(ciclo),stof(mensualidad)};
+        return record;
+    }
+    Alumno readRecord(int pos){
+        //para obtener el registro de la posición “pos”.
+        ifstream inFile;
+        Alumno record;
+        inFile.open(this->fileName);
+        if (inFile.is_open()){
+            char buffer[sizeof(Alumno)];
+            buffer[sizeof(Alumno)-sizeof(int)] = '0';
+            while(1){
+                inFile.seekg(pos*sizeof(Alumno)+5,ios::beg);
+                inFile.read((char*) &buffer,sizeof(Alumno));
+                cout<<buffer;
+                break;
+                if(buffer[sizeof(Alumno)-sizeof(int)] == '0'){
+                    record = desempaquetar(buffer);
+                    break;
+                } 
+                else pos++;
+            }
+            inFile.close(); 
+        }
+        else{
+            cout<<"No se pudo abrir el archivo";
+        }
+        return record;
+    }
 
 };
 
 
 int main(int argc, char const *argv[])
 {
-    FixedRecord manager("datos1.bin");
+    FixedRecord manager("datosp2.txt");
+
+    //testing deletion
+    manager.deleteRecord(1);
+
     //testing readRecord
-    // auto alumno = manager.readRecord(2);
-    // alumno.print();
+    // auto alumno = manager.readRecord(0);
+    // //alumno.print();
 
     //testing add()
-    // Alumno nuevoAlumno{"0008","Mauricio","Rodriguez","Computacion"};
-    // manager.add(nuevoAlumno);
+    Alumno nuevoAlumno{"0008","Mauricio","Rodriguez","Computacion",9,1589.90};
+    manager.add(nuevoAlumno);
 
     //testing load
     // vector<Alumno> vec = manager.load();
@@ -242,7 +288,5 @@ int main(int argc, char const *argv[])
     //   vec[i].print();
     // }
 
-    //testing deletion
-    manager.deleteRecord(3);
     return 0;
 }

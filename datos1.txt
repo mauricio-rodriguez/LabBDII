@@ -1,7 +1,7 @@
 0001 Howard      Paredes Zegarra     Computacion    
 0002 Penny       Vargas Cordero      Industrial     
 0003 Sheldon     Cooper Quizpe       Mecatronica    
-0004 Penny       Vargas Cordero    Industrial     
+0004 Penny       Vargas Cordero      Industrial     
 0005 Sheldon     Cooper Quizpe       Mecatronica    
 0006 Penny       Vargas Cordero      Industrial     
 0007 Sheldon     Cooper Quizpe       Mecatronica    
